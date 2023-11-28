@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
@@ -30,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uz.ictschool.recyclersort.model.Product
+import uz.ictschool.recyclersort.model.categories
 import uz.ictschool.recyclersort.model.products
 import uz.ictschool.recyclersort.ui.theme.RecyclerSortTheme
 import uz.ictschool.recyclersort.ui.theme.productItemBG
@@ -71,13 +74,17 @@ fun MyView(products:MutableList<Product>) {
             .fillMaxSize()
             .padding(10.dp)
     ) {
+
+        //chips ishlatildi
+
+        productList = Chips()
+
         RangeSlider(
             value = sliderValue,
             onValueChange = { newValues ->
                 sliderValue = newValues
             },
             onValueChangeFinished = {
-
                 var tempProduct = mutableListOf<Product>()
 
                 for (p in products){
@@ -85,7 +92,6 @@ fun MyView(products:MutableList<Product>) {
                         tempProduct.add(p)
                     }
                 }
-
                 productList = tempProduct
 
             },
@@ -103,12 +109,50 @@ fun MyView(products:MutableList<Product>) {
             }
         }
     }
-
-
-
 }
 
 
+@SuppressLint("MutableCollectionMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Chips():MutableList<Product> {
+
+    var selectedCategory by remember {
+        mutableStateOf(categories[0])
+    }
+
+    var productList by remember {
+        mutableStateOf(products)
+    }
+
+    LazyRow(modifier = Modifier.fillMaxWidth()) {
+        items(categories) { item ->
+            FilterChip(
+                modifier = Modifier.padding(horizontal = 6.dp), // gap between items
+                selected = (item == selectedCategory),
+                onClick = {
+                    selectedCategory = item
+
+                    var tempProducts = mutableListOf<Product>()
+
+                    for (p in products){
+                        if (p.category == selectedCategory){
+                            tempProducts.add(p)
+                        }
+                    }
+
+                    productList = tempProducts
+
+                },
+                label = {
+                    Text(text = item)
+                }
+            )
+        }
+    }
+
+    return productList
+}
 
 
 @Composable

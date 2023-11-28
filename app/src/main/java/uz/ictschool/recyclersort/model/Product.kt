@@ -6,28 +6,53 @@ data class Product(
     var category: String
 )
 
+val categories = listOf<String>(
+    "Texnika",
+    "Ovqat",
+    "Mebel",
+    "Kiyim"
+)
+
 public var products = mutableListOf<Product>(
     Product(
-        "Computer",
-        8000,
-        "Texnika"
+        "Komputer",
+        789,
+        categories[0]
     ),
 
     Product(
         "Choy",
         16,
-        "Ovqat"
+        categories[1]
+    ),
+
+    Product(
+        "Etik",
+        68,
+        categories[3]
     ),
 
     Product(
         "Divan",
         354,
-        "Mebel"
+        categories[2]
     ),
 
     Product(
         "Televizor",
         287,
-        "Texnika"
+        categories[0]
+    ),
+
+    Product(
+        "Makaron",
+        25,
+        categories[1]
+    ),
+
+    Product(
+        "Shkaf",
+        145,
+        categories[2]
     )
 )
