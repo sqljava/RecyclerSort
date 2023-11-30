@@ -61,11 +61,9 @@ fun MyView() {
     var categorisedProducts by remember {
         mutableStateOf(products)
     }
-
     var sortedProducts by remember {
         mutableStateOf(categorisedProducts)
     }
-
 
     Column(
         modifier = Modifier
@@ -73,23 +71,11 @@ fun MyView() {
             .padding(10.dp)
     ) {
 
-        //chips ishlatildi
-
         categorisedProducts = Chips()
-
-
-        //slider
-
-        //Log.d("TAG", "cated: $categorisedProducts")
-
 
         sortedProducts = RangeSliderView(categorisedProducts)
 
-        //Log.d("TAG", "sorted: $sortedProducts")
-
-
-
-        LazyColumn {
+LazyColumn {
             items(sortedProducts) { product ->
                 ProductView(product = product)
             }
@@ -148,11 +134,7 @@ fun RangeSliderView(
     var productList by remember {
         mutableStateOf(products)
     }
-
     productList = categorisedProducts
-
-    Log.d("TAG", "sortdan oldin: $productList")
-
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
@@ -171,9 +153,6 @@ fun RangeSliderView(
                     "End: ${sliderRangeValue.endInclusive.toInt()}"
         )
     }
-
-    Log.d("TAG", "sortdan keyin: $productList")
-
     return productList
 }
 
