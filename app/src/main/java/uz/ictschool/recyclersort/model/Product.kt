@@ -7,52 +7,54 @@ data class Product(
 )
 
 val categories = listOf<String>(
+    "Hammasi",
     "Texnika",
     "Ovqat",
     "Mebel",
     "Kiyim"
 )
-
 public var products = mutableListOf<Product>(
     Product(
         "Komputer",
         789,
-        categories[0]
+        categories[1]
     ),
 
     Product(
         "Choy",
         16,
-        categories[1]
+        categories[2]
     ),
 
     Product(
         "Etik",
         68,
-        categories[3]
+        categories[4]
     ),
 
     Product(
         "Divan",
         354,
-        categories[2]
+        categories[3]
     ),
 
     Product(
         "Televizor",
         287,
-        categories[0]
+        categories[1]
     ),
 
     Product(
         "Makaron",
         25,
-        categories[1]
+        categories[2]
     ),
 
     Product(
         "Shkaf",
         145,
-        categories[2]
+        categories[3]
     )
 )
+
+var sliderRangeValue = 0f..1000f

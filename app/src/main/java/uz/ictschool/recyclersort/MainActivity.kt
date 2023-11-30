@@ -2,6 +2,7 @@ package uz.ictschool.recyclersort
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -18,12 +19,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import uz.ictschool.recyclersort.model.Product
 import uz.ictschool.recyclersort.model.categories
 import uz.ictschool.recyclersort.model.products
+import uz.ictschool.recyclersort.model.sliderRangeValue
 import uz.ictschool.recyclersort.ui.theme.RecyclerSortTheme
 import uz.ictschool.recyclersort.ui.theme.productItemBG
 
@@ -45,10 +45,9 @@ class MainActivity : ComponentActivity() {
             RecyclerSortTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    MyView(products)
+                    MyView()
                 }
             }
         }
@@ -56,16 +55,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @SuppressLint("MutableCollectionMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyView(products:MutableList<Product>) {
+fun MyView() {
 
-    var sliderValue by remember{
-        mutableStateOf(0f..300f)
+    var categorisedProducts by remember {
+        mutableStateOf(products)
     }
 
-    var productList by remember {
-        mutableStateOf(products)
+    var sortedProducts by remember {
+        mutableStateOf(categorisedProducts)
     }
 
 
@@ -77,45 +75,34 @@ fun MyView(products:MutableList<Product>) {
 
         //chips ishlatildi
 
-        productList = Chips()
+        categorisedProducts = Chips()
 
-        RangeSlider(
-            value = sliderValue,
-            onValueChange = { newValues ->
-                sliderValue = newValues
-            },
-            onValueChangeFinished = {
-                var tempProduct = mutableListOf<Product>()
 
-                for (p in products){
-                    if (p.price.toFloat() in sliderValue){
-                        tempProduct.add(p)
-                    }
-                }
-                productList = tempProduct
+        //slider
 
-            },
-            valueRange = 0f..300f,
-            steps = 0
-        )
-        Text(text = "Start: ${sliderValue.start.toInt()}, " +
-                "End: ${sliderValue.endInclusive.toInt()}")
+        //Log.d("TAG", "cated: $categorisedProducts")
+
+
+        sortedProducts = RangeSliderView(categorisedProducts)
+
+        //Log.d("TAG", "sorted: $sortedProducts")
 
 
 
-        LazyColumn{
-            items(productList) { product ->
+        LazyColumn {
+            items(sortedProducts) { product ->
                 ProductView(product = product)
             }
         }
     }
 }
 
-
 @SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Chips():MutableList<Product> {
+fun Chips(
+
+): MutableList<Product> {
 
     var selectedCategory by remember {
         mutableStateOf(categories[0])
@@ -127,64 +114,111 @@ fun Chips():MutableList<Product> {
 
     LazyRow(modifier = Modifier.fillMaxWidth()) {
         items(categories) { item ->
-            FilterChip(
-                modifier = Modifier.padding(horizontal = 6.dp), // gap between items
-                selected = (item == selectedCategory),
-                onClick = {
+            FilterChip(modifier = Modifier.padding(horizontal = 6.dp), // gap between items
+                selected = (item == selectedCategory), onClick = {
                     selectedCategory = item
 
                     var tempProducts = mutableListOf<Product>()
 
-                    for (p in products){
-                        if (p.category == selectedCategory){
+                    for (p in products) {
+                        if (selectedCategory == categories[0]) {
+                            tempProducts = products
+                        } else if (selectedCategory == p.category) {
                             tempProducts.add(p)
                         }
                     }
 
-                    productList = tempProducts
+                    productList = sortByPrice(sliderRangeValue, tempProducts)
 
-                },
-                label = {
+                }, label = {
                     Text(text = item)
-                }
-            )
+                })
         }
     }
+    return productList
+}
+
+@SuppressLint("MutableCollectionMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RangeSliderView(
+    categorisedProducts: MutableList<Product>
+): MutableList<Product> {
+
+    var productList by remember {
+        mutableStateOf(products)
+    }
+
+    productList = categorisedProducts
+
+    Log.d("TAG", "sortdan oldin: $productList")
+
+
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+    ) {
+        RangeSlider(
+            value = sliderRangeValue, onValueChange = { newValues ->
+                sliderRangeValue = newValues
+            }, onValueChangeFinished = {
+
+                productList = sortByPrice(sliderRangeValue, categorisedProducts)
+
+            }, valueRange = 0f..1000f, steps = 0
+        )
+        Text(
+            text = "Start: ${sliderRangeValue.start.toInt()}, " +
+                    "End: ${sliderRangeValue.endInclusive.toInt()}"
+        )
+    }
+
+    Log.d("TAG", "sortdan keyin: $productList")
 
     return productList
 }
 
+fun sortByPrice(
+    range: ClosedFloatingPointRange<Float>,
+    list: MutableList<Product>):MutableList<Product> {
+
+    var tempProducts = mutableListOf<Product>()
+
+    for (p in list){
+        if (p.price.toFloat() in range){
+            tempProducts.add(p)
+        }
+    }
+    return tempProducts
+}
 
 @Composable
-fun ProductView(product: Product){
-
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 10.dp)){
-
+fun ProductView(product: Product) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+    ) {
         Card {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(productItemBG)
-                    .padding(5.dp)
+                    .padding(vertical = 5.dp, horizontal = 10.dp)
             ) {
-                Text(text = product.name,
+                Text(
+                    text = product.name,
                     fontSize = 25.sp,
-                    )
-
+                )
                 Text(text = "Price: ${product.price}")
             }
         }
     }
-
-
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     RecyclerSortTheme {
-        MyView(products)
+        MyView()
     }
 }
